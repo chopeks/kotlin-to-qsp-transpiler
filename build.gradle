@@ -10,9 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation "org.jetbrains.kotlin:kotlin-reflect"
-    implementation "org.antlr:antlr4-runtime:4.7.2"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "org.antlr:antlr4-runtime:4.7.2"
 }
 
 compileKotlin {
@@ -20,4 +19,8 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+jar {
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
