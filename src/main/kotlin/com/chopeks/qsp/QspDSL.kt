@@ -60,7 +60,7 @@ fun arrPos(start: Int, arrayName: String, pattern: String): Int = 0
 fun arrPos(arrayName: String, regex: String): Int = 0
 //ARRSIZE
 /** size of an array*/
-fun arrsize(arrayName: String): Int = 0
+fun arrSize(arrayName: String): Int = 0
 //$BACKIMAGE that's a variable, check QspTypes
 //BCOLOR that's a variable, check QspTypes
 //CLA

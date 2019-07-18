@@ -200,6 +200,9 @@ class KotlinToQspTranspiler(
       if (ctx.annotatedLambda().isEmpty() && token != null) {
         // TODO add rest of methods...
         when (token!!.text.toLowerCase()) {
+          // these are literally not changed, just passed as is, but () will be removed
+          "addLib", "addObj", "addQst", "arrComp", "arrPos", "arrSize",
+          "close", "cmdClr", "copyArr", "countObj", "delAct",
           "gs", "gt", "delact", "killvar", "func", "wait", "msg", "jump" -> {
             list[ctx.start.tokenIndex] = " "; list[ctx.stop.tokenIndex] = " "
           }
@@ -207,7 +210,7 @@ class KotlinToQspTranspiler(
           "cla" -> rename(ctx, token, "cla")
           "cls" -> rename(ctx, token, "cls")
           "clr" -> rename(ctx, token, "*clr")
-          "aclr" -> rename(ctx, token, "clr")
+          "aClr" -> rename(ctx, token, "clr")
           "ap" -> rename(ctx, token, "p")
           "apl" -> rename(ctx, token, "pl")
           "anl" -> rename(ctx, token, "nl")
@@ -218,7 +221,7 @@ class KotlinToQspTranspiler(
           "play" -> rename(ctx, token, "PLAY")
           "rand", "rgb", "min", "max",
           "iif", "ucase", "mid", "len",
-          "arrsize", "strpos" -> Unit // ignore!
+          "arrsize", "strpos" -> Unit // ignore! leave as is with ()
           else -> println("call: ${token!!.text}${ctx.text}")
         }
       }

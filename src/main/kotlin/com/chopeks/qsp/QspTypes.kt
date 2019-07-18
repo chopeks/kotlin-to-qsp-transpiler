@@ -3,16 +3,15 @@ package com.chopeks.qsp
 /*
 * Basically QSP has only one type, that can act as:
 * String, Int, arrays of those, but index can be Int or String...
-* So.. For kotlin to emulate it there's Any + array operators for it
+* So.. For kotlin to emulate it, there's Any + array operators for it
 */
-operator fun Any.get(int: Int): Any = 0
 
+operator fun Any.get(int: Int): Any = 0
 operator fun Any.get(int: String): Any = 0
 operator fun Any.set(int: Int, i: Int) = 0
 operator fun Any.set(int: String, i: Int) = 0
 operator fun Any.set(int: Int, i: String) = 0
 operator fun Any.set(int: String, i: String) = 0
-
 
 // there are also some predefined variables:
 /** script arguments */
