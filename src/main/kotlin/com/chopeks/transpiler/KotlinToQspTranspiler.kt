@@ -10,42 +10,51 @@ class KotlinToQspTranspiler(
 ) {
   private val tokenList = mutableListOf<String>()
 
-  fun compile(srcFile: File, targetFile: File) {
-    val preprocessedCode = KotlinToQspPreProcessor.process(srcFile, preProcessors)
+  fun transpile(srcFile: File, targetFile: File) {
+    targetFile.writeText("# ${targetFile.nameWithoutExtension}\n\n")
+    targetFile.appendText("!! File generated from '${srcFile.name}'\n\n")
+    targetFile.appendText(transpile(srcFile.readText()))
+    targetFile.appendText("\n--- ${targetFile.nameWithoutExtension} ---------------------------------\n")
+  }
+
+  fun transpile(source: String): String {
+    val preprocessedCode = KotlinToQspPreProcessor.process(source, preProcessors)
 
     val lexer = KotlinLexer(CharStreams.fromString(preprocessedCode))
     val tokens = CommonTokenStream(lexer)
     val parser = KotlinParser(tokens)
 
-    val log = File(targetFile.parent, "log.txt")
-    log.writeText("")
     for (i in 0 until tokens.numberOfOnChannelTokens) {
-      log.appendText(tokens[i].toString() + '\n')
       tokenList.add(tokens[i].text)
+    }
+
+    if ("import" in tokenList) {
+      for (i in 0..tokenList.lastIndexOf("import")) tokenList[i] = ""
+      for (i in 0..tokenList.indexOf("\n")) tokenList[i] = ""
     }
 
     for (i in 0 until tokens.numberOfOnChannelTokens) {
       val token = tokens[i]
       when (token.type) {
-        KotlinLexer.NL -> tokenList[i] = "\n"
-        KotlinLexer.SEMICOLON -> tokenList[i] = " & "
-        KotlinLexer.LineComment -> tokenList[i] = tokenList[i].replaceFirst("//", "!!")
-        KotlinLexer.Identifier -> {
-          when (token.text) {
-            "`=`" -> tokenList[i] = " = "
-          }
-        }
+        KotlinLexer.NL               -> tokenList[i] = "\n"
+        KotlinLexer.SEMICOLON        -> tokenList[i] = "& "
+        KotlinLexer.LineComment      -> tokenList[i] = ""
+        KotlinLexer.DelimitedComment -> tokenList[i] = ""
+        KotlinLexer.Inside_Comment   -> tokenList[i] = ""
+        KotlinLexer.StrExpr_Comment  -> tokenList[i] = ""
+        KotlinLexer.VAL              -> tokenList[i] = ""
+        KotlinLexer.VAR              -> tokenList[i] = ""
       }
     }
 
     ParseTreeWalker().apply {
-      walk(ComparisionOperatorTracker(tokenList), parser.kotlinFile()); parser.reset()
-      walk(IfTracker(tokenList), parser.kotlinFile());parser.reset()
-      walk(ElseTracker(tokenList), parser.kotlinFile());parser.reset()
-      walk(LambdasTracker(tokenList), parser.kotlinFile());parser.reset()
-      walk(CallTracker(tokenList), parser.kotlinFile());parser.reset()
-      walk(LineStringExprTracker(tokenList), parser.kotlinFile());parser.reset()
-      walk(StringWithDollarTracker(tokenList), parser.kotlinFile());parser.reset()
+      walk(ComparisionOperatorTracker(tokenList), parser.script()); parser.reset()
+      walk(IfTracker(tokenList), parser.script());parser.reset()
+      walk(ElseTracker(tokenList), parser.script());parser.reset()
+      walk(LambdasTracker(tokenList), parser.script());parser.reset()
+      walk(CallTracker(tokenList), parser.script());parser.reset()
+      walk(LineStringExprTracker(tokenList), parser.script());parser.reset()
+      walk(StringWithDollarTracker(tokenList), parser.script());parser.reset()
     }
 
     for (i in 1 until tokenList.size) {
@@ -57,15 +66,13 @@ class KotlinToQspTranspiler(
       }
     }
 
-    val code = tokenList.subList(tokenList.indexOf("fun") + 6, tokenList.lastIndexOf("}")).joinToString("")
-
-    targetFile.writeText("# ${targetFile.nameWithoutExtension}\n\n")
-    targetFile.appendText("!! File generated from '${srcFile.name}'\n\n")
-    targetFile.appendText(KotlinToQspPostProcessor.process(code))
-    targetFile.appendText("\n--- ${targetFile.nameWithoutExtension} ---------------------------------\n")
+    val code = tokenList.apply { remove(last()) }.joinToString("")
 
     tokenList.clear()
+
+    return KotlinToQspPostProcessor.process(code)
   }
+
 
   class ComparisionOperatorTracker(val list: MutableList<String>) : KotlinParserBaseListener() {
     override fun enterEqualityOperation(ctx: KotlinParser.EqualityOperationContext) {
@@ -133,7 +140,6 @@ class KotlinToQspTranspiler(
             list[ctx.stop.tokenIndex] = ""
           }
         }
-
       }
       insideIf = false
       removeBrackets = false
@@ -144,10 +150,12 @@ class KotlinToQspTranspiler(
   class ElseTracker(val list: MutableList<String>) : KotlinParserBaseListener() {
     var blockId = 0
     var removeBrackets = false
+    var hasNL = false
     override fun enterIfExpression(ctx: KotlinParser.IfExpressionContext) {
       ctx.ELSE()?.apply {
         blockId = ctx.controlStructureBody(1)?.ruleIndex!!
-        removeBrackets = ctx.controlStructureBody(1)?.text?.contains("\n") == true
+        removeBrackets = ctx.controlStructureBody(1)?.text?.contains("{") == true
+        hasNL = ctx.controlStructureBody(1)?.text?.contains("\n") == true
       }
     }
 
@@ -155,7 +163,7 @@ class KotlinToQspTranspiler(
       if (ctx.ruleIndex == blockId) {
         if (ctx.start.text == "{") {
           list[ctx.start.tokenIndex] = ""
-          list[ctx.stop.tokenIndex] = "end"
+          list[ctx.stop.tokenIndex] = if (hasNL) "end" else ""
         }
       }
     }
@@ -196,13 +204,13 @@ class KotlinToQspTranspiler(
 
     override fun enterCallSuffix(ctx: KotlinParser.CallSuffixContext) {
       val rename: (KotlinParser.CallSuffixContext, Token?, String) -> Unit =
-        { ctx, token, name -> list[ctx.start.tokenIndex] = " "; list[ctx.stop.tokenIndex] = " "; list[token!!.tokenIndex] = name }
+        { ctx, token, name -> list[ctx.start.tokenIndex] = ""; list[ctx.stop.tokenIndex] = " "; list[token!!.tokenIndex] = name }
       if (ctx.annotatedLambda().isEmpty() && token != null) {
         // TODO add rest of methods...
         when (token!!.text.toLowerCase()) {
           // these are literally not changed, just passed as is, but () will be removed
-          "addLib", "addObj", "addQst", "arrComp", "arrPos", "arrSize",
-          "close", "cmdClr", "copyArr", "countObj", "delAct",
+//          "addLib", "addObj", "addQst", "arrComp", "arrPos", "arrSize",
+//          "close", "cmdClr", "copyArr", "countObj", "delAct",
           "gs", "gt", "delact", "killvar", "func", "wait", "msg", "jump" -> {
             list[ctx.start.tokenIndex] = " "; list[ctx.stop.tokenIndex] = " "
           }

@@ -4,30 +4,31 @@ package com.chopeks.qsp
 * Basically QSP has only one type, that can act as:
 * String, Int, arrays of those, but index can be Int or String...
 * So.. For kotlin to emulate it, there's Any + array operators for it
+*
+* But, there's some other variable like type, which is name = {} used with conjunction with dynamic(...), so there's alias for it
 */
 
-operator fun Any.get(int: Int): Any = 0
-operator fun Any.get(int: String): Any = 0
-operator fun Any.set(int: Int, i: Int) = 0
-operator fun Any.set(int: String, i: Int) = 0
-operator fun Any.set(int: Int, i: String) = 0
-operator fun Any.set(int: String, i: String) = 0
+typealias QspCodeTemplate = (Unit) -> Unit
+typealias QspType = Any
+
+operator fun QspType.get(type: QspType): QspType = 0
+operator fun QspType.set(type: QspType, index: QspType) = 0
 
 // there are also some predefined variables:
 /** script arguments */
-val `$args`: Any = 0
+val `$args`: QspType = 0
 /** script arguments */
-val args: Any = 0
+val args: QspType = 0
 /** path to background image */
-var `$backImage`: Any = 0
+var `$backImage`: QspType = 0
 /** background color */
 var bColor: Int = 0
 /** location counter is called at equal intervals */
-var `$counter`: Any = 0
+var `$counter`: QspType = 0
 /** array of current actions */
-var `$curActs`: Any = 0
+var `$curActs`: QspType = 0
 /** current location */
-var `$curLoc`: Any = 0
+var `$curLoc`: QspType = 0
 /**
  * if the value of the variable is not equal to 0, then the check of the game identifier is disabled when the state is loaded.
  * Set to 1 if you want to have saves compatible after game file change
@@ -43,7 +44,7 @@ var fColor: Int = 0
 /** font size */
 var fSize: Int = 0
 /** font name */
-var `$fName`: Any = 0
+var `$fName`: QspType = 0
 /** link color */
 var lColor: Int = 0
 /** stores current text from main window */
@@ -53,27 +54,27 @@ val msecsCount: Int = 0
 /** prevents saving game (1) or unlocks it (0) */
 var noSave: Int = 0
 /** backpack (?)*/
-val objects: Any = 0
+val objects: QspType = 0
 /** on action selected */
-var `$onActSel`: Any = ""
+var `$onActSel`: QspType = ""
 /** on game load */
-var `$onGLoad`: Any = ""
+var `$onGLoad`: QspType = ""
 /** on game save*/
-var `$onGSave`: Any = ""
+var `$onGSave`: QspType = ""
 /** on enter to new location via gt, called *before* entering location */
-var `$onNewLoc`: Any = ""
+var `$onNewLoc`: QspType = ""
 /** on item in backpack add, $args[0] - item name, $args[1] - item image*/
-var `$onObjAdd`: Any = ""
+var `$onObjAdd`: QspType = ""
 /** on item in backpack delete, $args[0] - item name */
-var `$onObjDel`: Any = ""
+var `$onObjDel`: QspType = ""
 /** stores current content of additional window */
-val `$statTxt`: Any = ""
+val `$statTxt`: QspType = ""
 /** enable html in all windows */
 var useHtml: Int = 0
 /** reponse from input(...) call is here */
-var `$userCom`: Any = ""
+var `$userCom`: QspType = ""
 /** text from input(...) call is here */
-var `$userTxt`: Any = ""
+var `$userTxt`: QspType = ""
 /** */
 val qspVer: String = ""
 /** */
