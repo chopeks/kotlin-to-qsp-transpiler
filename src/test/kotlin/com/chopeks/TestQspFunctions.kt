@@ -29,5 +29,48 @@ object TestQspFunctions : Spek({
         transpiler.transpile(code).trim() `should be equal to` "*clr & cla"
       }
     }
+
+    describe("special cases") {
+      it("killVar with string") {
+        val code = """
+          killVar("variable")  
+        """.trimIndent()
+        transpiler.transpile(code).trim() `should be equal to` "killvar('variable')"
+      }
+      it("killVar with variable") {
+        val code = """
+          killVar(variable)  
+        """.trimIndent()
+        transpiler.transpile(code).trim() `should be equal to` "killvar('variable')"
+      }
+      it("killVar with `variable`") {
+        val code = "killVar(`variable`)"
+        transpiler.transpile(code).trim() `should be equal to` "killvar('variable')"
+      }
+      it("killVar with `\$variable`") {
+        val code = "killVar(`\$variable`)"
+        transpiler.transpile(code).trim() `should be equal to` "killvar('\$variable')"
+      }
+      it("dynamic with string") {
+        val code = """
+          dynamic("variable")  
+        """.trimIndent()
+        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+      }
+      it("dynamic with variable") {
+        val code = """
+          dynamic(variable)  
+        """.trimIndent()
+        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+      }
+      it("dynamic with `variable`") {
+        val code = "dynamic(`variable`)"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+      }
+      it("dynamic with `\$variable`") {
+        val code = "dynamic(`\$variable`)"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic('\$variable')"
+      }
+    }
   }
 })

@@ -188,7 +188,7 @@ class KotlinToQspTranspiler(
             list[ctx.start.tokenIndex] = ": "
             list[ctx.stop.tokenIndex] = if (inline) "" else "end"
           }
-          else -> when (token2?.text) {
+          else  -> when (token2?.text) {
             "obj" -> list[token2!!.tokenIndex] = " "
           }
         }
@@ -198,6 +198,7 @@ class KotlinToQspTranspiler(
 
   class CallTracker(val list: MutableList<String>) : KotlinParserBaseListener() {
     private var token: Token? = null
+    private var specialCase1 = false
     override fun enterSimpleIdentifier(ctx: KotlinParser.SimpleIdentifierContext) {
       token = ctx.start
     }
@@ -209,30 +210,54 @@ class KotlinToQspTranspiler(
         // TODO add rest of methods...
         when (token!!.text.toLowerCase()) {
           // these are literally not changed, just passed as is, but () will be removed
-//          "addLib", "addObj", "addQst", "arrComp", "arrPos", "arrSize",
-//          "close", "cmdClr", "copyArr", "countObj", "delAct",
-          "gs", "gt", "delact", "killvar", "func", "wait", "msg", "jump" -> {
+          "gs", "gt", "delact", "func",
+          "wait", "msg", "jump" -> {
             list[ctx.start.tokenIndex] = " "; list[ctx.stop.tokenIndex] = " "
           }
-          "label" -> rename(ctx, token, ":")
-          "cla" -> rename(ctx, token, "cla")
-          "cls" -> rename(ctx, token, "cls")
-          "clr" -> rename(ctx, token, "*clr")
-          "aClr" -> rename(ctx, token, "clr")
-          "ap" -> rename(ctx, token, "p")
-          "apl" -> rename(ctx, token, "pl")
-          "anl" -> rename(ctx, token, "nl")
-          "p" -> rename(ctx, token, "*p")
-          "pl" -> rename(ctx, token, "*pl")
-          "nl" -> rename(ctx, token, "*nl")
-          "closeAll" -> rename(ctx, token, "CLOSE ALL")
-          "play" -> rename(ctx, token, "PLAY")
+          "killvar", "dynamic"  -> {
+            list[token!!.tokenIndex] = token!!.text.toLowerCase()
+            specialCase1 = true
+          }
+          "label"               -> rename(ctx, token, ":")
+          "cla"                 -> rename(ctx, token, "cla")
+          "cls"                 -> rename(ctx, token, "cls")
+          "clr"                 -> rename(ctx, token, "*clr")
+          "aClr"                -> rename(ctx, token, "clr")
+          "ap"                  -> rename(ctx, token, "p")
+          "apl"                 -> rename(ctx, token, "pl")
+          "anl"                 -> rename(ctx, token, "nl")
+          "p"                   -> rename(ctx, token, "*p")
+          "pl"                  -> rename(ctx, token, "*pl")
+          "nl"                  -> rename(ctx, token, "*nl")
+          "closeAll"            -> rename(ctx, token, "CLOSE ALL")
+          "play"                -> rename(ctx, token, "PLAY")
           "rand", "rgb", "min", "max",
           "iif", "ucase", "mid", "len",
-          "arrsize", "strpos" -> Unit // ignore! leave as is with ()
-          else -> println("call: ${token!!.text}${ctx.text}")
+          "arrsize", "strpos"   -> Unit // ignore! leave as is with ()
+          else                  -> println("call: ${token!!.text}${ctx.text}")
         }
       }
+    }
+
+    override fun enterValueArgument(ctx: KotlinParser.ValueArgumentContext) {
+      if (specialCase1) {
+        val name = ctx.text
+        if (name.startsWith("\"")) {
+          // this is ok, do nothing
+        } else if (name.startsWith("`")) {
+          // this has value enclosed in ``
+          if (name.trim('`').startsWith("$")) {
+            // string variable, escape $
+            list[ctx.start.tokenIndex] = "\"${name.trim('`').replaceFirst("$", "\\\$")}\""
+          } else {
+            list[ctx.start.tokenIndex] = "\"${name.trim('`')}\""
+          }
+        } else {
+          // this is most likely int variable, so enclose it in ""
+          list[ctx.start.tokenIndex] = "\"$name\""
+        }
+      }
+      specialCase1 = false
     }
   }
 
@@ -245,7 +270,9 @@ class KotlinToQspTranspiler(
   class StringWithDollarTracker(val list: MutableList<String>) : KotlinParserBaseListener() {
     override fun enterSimpleIdentifier(ctx: KotlinParser.SimpleIdentifierContext) {
       if (ctx.start.text.let { it.startsWith("`") && it.endsWith("`") }) {
-        list[ctx.start.tokenIndex] = ctx.text.substring(1 until ctx.text.length - 1)
+        if (list[ctx.start.tokenIndex].let { it.startsWith("`") && it.endsWith("`") }) {
+          list[ctx.start.tokenIndex] = ctx.text.substring(1 until ctx.text.length - 1)
+        }
       }
     }
   }
