@@ -10,9 +10,14 @@ repositories {
     jcenter()
 }
 
+configurations {
+    extraLibs
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile "org.antlr:antlr4-runtime:4.7.2"
+    extraLibs "org.antlr:antlr4-runtime:4.7.2"
 
 
     testImplementation "org.amshove.kluent:kluent:1.53"
@@ -32,5 +37,11 @@ compileTestKotlin {
 test {
     useJUnitPlatform {
         includeEngines 'spek2'
+    }
+}
+
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }

@@ -222,14 +222,14 @@ class KotlinToQspTranspiler(
           "cla"                 -> rename(ctx, token, "cla")
           "cls"                 -> rename(ctx, token, "cls")
           "clr"                 -> rename(ctx, token, "*clr")
-          "aClr"                -> rename(ctx, token, "clr")
+          "aclr"                -> rename(ctx, token, "clr")
           "ap"                  -> rename(ctx, token, "p")
           "apl"                 -> rename(ctx, token, "pl")
           "anl"                 -> rename(ctx, token, "nl")
           "p"                   -> rename(ctx, token, "*p")
           "pl"                  -> rename(ctx, token, "*pl")
           "nl"                  -> rename(ctx, token, "*nl")
-          "closeAll"            -> rename(ctx, token, "CLOSE ALL")
+          "closeall"            -> rename(ctx, token, "CLOSE ALL")
           "play"                -> rename(ctx, token, "PLAY")
           "rand", "rgb", "min", "max",
           "iif", "ucase", "mid", "len",
