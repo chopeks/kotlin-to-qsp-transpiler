@@ -13,6 +13,7 @@ typealias QspType = Any
 
 operator fun QspType.get(type: QspType): QspType = 0
 operator fun QspType.set(type: QspType, index: QspType) = 0
+operator fun QspType.rem(type: QspType): QspType = 0
 
 // there are also some predefined variables:
 /** script arguments */
