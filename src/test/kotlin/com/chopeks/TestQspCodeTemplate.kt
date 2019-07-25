@@ -27,18 +27,16 @@ object TestQspCodeTemplate : Spek({
         val code = """
           @file:Suppress("UNUSED_EXPRESSION", "CascadeIf", "LiftReturnOrAssignment", "ConvertTwoComparisonsToRangeCheck", "RemoveCurlyBracesFromTemplate", "RemoveSingleExpressionStringTemplate", "PackageDirectoryMismatch")
 
-          import com.chopeks.glife.*
-          import com.chopeks.glife.extensions.*
           import com.chopeks.qsp.*
           import mod.*
           
-          if (args[0] == "cafe_parco") {
+          if (args[0] == "loc") {
             gs("stat")
           }
 
         """.trimIndent()
         transpiler.transpile(code).trim() `should be equal to` """
-          if args[0] = 'cafe_parco': 
+          if args[0] = 'loc': 
               gs 'stat' 
           end
         """.trimIndent()
