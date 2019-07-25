@@ -5,21 +5,23 @@ import org.amshove.kluent.`should be equal to`
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
-object TestQspVariables : Spek({
+object TestQspCodeTemplate : Spek({
   describe("Transpiler") {
     val transpiler by memoized { KotlinToQspTranspiler() }
 
-    it("""can define local variable""") {
-      val code = """
-          if(v == 1) {
-            val n = 1
+    describe("code templates") {
+      it("code template") {
+        val code = """
+          `${"\$object"}` = {
+            n = 2
           }
         """.trimIndent()
-      transpiler.transpile(code).trim() `should be equal to` """
-          if v = 1: 
-              n=1
-          end
+        transpiler.transpile(code).trim() `should be equal to` """
+          ${"\$object"} = {
+              n = 2
+          }
         """.trimIndent()
+      }
     }
   }
 })
