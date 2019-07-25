@@ -22,6 +22,27 @@ object TestQspCodeTemplate : Spek({
           }
         """.trimIndent()
       }
+
+      it("weird import case") {
+        val code = """
+          @file:Suppress("UNUSED_EXPRESSION", "CascadeIf", "LiftReturnOrAssignment", "ConvertTwoComparisonsToRangeCheck", "RemoveCurlyBracesFromTemplate", "RemoveSingleExpressionStringTemplate", "PackageDirectoryMismatch")
+
+          import com.chopeks.glife.*
+          import com.chopeks.glife.extensions.*
+          import com.chopeks.qsp.*
+          import mod.*
+          
+          if (args[0] == "cafe_parco") {
+            gs("stat")
+          }
+
+        """.trimIndent()
+        transpiler.transpile(code).trim() `should be equal to` """
+          if args[0] = 'cafe_parco': 
+              gs 'stat' 
+          end
+        """.trimIndent()
+      }
     }
   }
 })

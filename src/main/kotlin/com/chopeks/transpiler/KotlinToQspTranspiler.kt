@@ -28,11 +28,6 @@ class KotlinToQspTranspiler(
       tokenList.add(tokens[i].text)
     }
 
-    if ("import" in tokenList) {
-      for (i in 0..tokenList.lastIndexOf("import")) tokenList[i] = ""
-      for (i in 0..tokenList.indexOf("\n")) tokenList[i] = ""
-    }
-
     for (i in 0 until tokens.numberOfOnChannelTokens) {
       val token = tokens[i]
       when (token.type) {
