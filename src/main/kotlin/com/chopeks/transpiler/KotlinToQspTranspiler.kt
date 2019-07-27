@@ -206,20 +206,20 @@ class KotlinToQspTranspiler(
         when (token!!.text.toLowerCase()) {
           // these are literally not changed, just passed as is, but () will be removed
           "gs", "gt", "delact", "func",
-          "wait", "msg", "jump" -> {
+          "wait", "msg", "jump", "dynamic" -> {
             list[ctx.start.tokenIndex] = " "; list[ctx.stop.tokenIndex] = " "
           }
-          "killvar", "dynamic"  -> {
+          "killvar"                        -> {
             list[token!!.tokenIndex] = token!!.text.toLowerCase()
             specialCase1 = true
           }
-          "label"               -> rename(ctx, token, ":")
-          "cla"                 -> rename(ctx, token, "cla")
-          "cls"                 -> rename(ctx, token, "cls")
-          "clr"                 -> rename(ctx, token, "*clr")
-          "aclr"                -> rename(ctx, token, "clr")
-          "ap"                  -> rename(ctx, token, "p")
-          "apl"                 -> rename(ctx, token, "pl")
+          "label"                          -> rename(ctx, token, ":")
+          "cla"                            -> rename(ctx, token, "cla")
+          "cls"                            -> rename(ctx, token, "cls")
+          "clr"                            -> rename(ctx, token, "*clr")
+          "aclr"                           -> rename(ctx, token, "clr")
+          "ap"                             -> rename(ctx, token, "p")
+          "apl"                            -> rename(ctx, token, "pl")
           "anl"                 -> rename(ctx, token, "nl")
           "p"                   -> rename(ctx, token, "*p")
           "pl"                  -> rename(ctx, token, "*pl")

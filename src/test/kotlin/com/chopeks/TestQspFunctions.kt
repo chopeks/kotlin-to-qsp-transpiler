@@ -55,21 +55,21 @@ object TestQspFunctions : Spek({
         val code = """
           dynamic("variable")  
         """.trimIndent()
-        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic 'variable'"
       }
       it("dynamic with variable") {
         val code = """
           dynamic(variable)  
         """.trimIndent()
-        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic variable"
       }
       it("dynamic with `variable`") {
         val code = "dynamic(`variable`)"
-        transpiler.transpile(code).trim() `should be equal to` "dynamic('variable')"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic variable"
       }
       it("dynamic with `\$variable`") {
         val code = "dynamic(`\$variable`)"
-        transpiler.transpile(code).trim() `should be equal to` "dynamic('\$variable')"
+        transpiler.transpile(code).trim() `should be equal to` "dynamic \$variable"
       }
     }
   }
