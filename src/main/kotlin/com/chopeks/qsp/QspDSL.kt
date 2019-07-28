@@ -339,12 +339,6 @@ fun wait(millis: QspType) = noop()
 /** same as gt(..) but previous location is not cleared */
 fun xgt(string: QspType, vararg target: Any) = noop()
 
-
 // There are some non api calls, because kotlin has it own limitations:
-
 /** defines label used with jump(...) function */
 fun label(string: QspType): QspType = ""
-
-
-/** wrapper on curly brackets in qsp, kotlin has no way to do so without identifier */
-fun newObj(block: (Unit) -> Unit) = ""
