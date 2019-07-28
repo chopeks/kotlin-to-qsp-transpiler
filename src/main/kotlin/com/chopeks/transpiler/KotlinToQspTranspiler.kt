@@ -213,23 +213,23 @@ class KotlinToQspTranspiler(
             list[token!!.tokenIndex] = token!!.text.toLowerCase()
             specialCase1 = true
           }
-          "label"                          -> rename(ctx, token, ":")
-          "cla"                            -> rename(ctx, token, "cla")
-          "cls"                            -> rename(ctx, token, "cls")
-          "clr"                            -> rename(ctx, token, "*clr")
-          "aclr"                           -> rename(ctx, token, "clr")
-          "ap"                             -> rename(ctx, token, "p")
-          "apl"                            -> rename(ctx, token, "pl")
-          "anl"                 -> rename(ctx, token, "nl")
-          "p"                   -> rename(ctx, token, "*p")
-          "pl"                  -> rename(ctx, token, "*pl")
-          "nl"                  -> rename(ctx, token, "*nl")
-          "closeall"            -> rename(ctx, token, "CLOSE ALL")
-          "play"                -> rename(ctx, token, "PLAY")
+          "label"             -> rename(ctx, token, ":")
+          "cla"               -> rename(ctx, token, "cla")
+          "cls"               -> rename(ctx, token, "cls")
+          "clr"               -> rename(ctx, token, "*clr")
+          "aclr"              -> rename(ctx, token, "clr")
+          "ap"                -> rename(ctx, token, "p")
+          "apl"               -> rename(ctx, token, "pl")
+          "anl"               -> rename(ctx, token, "nl")
+          "p"                 -> rename(ctx, token, "*p")
+          "pl"                -> rename(ctx, token, "*pl")
+          "nl"                -> rename(ctx, token, "*nl")
+          "closeall"          -> rename(ctx, token, "CLOSE ALL")
+          "play"              -> rename(ctx, token, "PLAY")
           "rand", "rgb", "min", "max",
           "iif", "ucase", "mid", "len",
-          "arrsize", "strpos"   -> Unit // ignore! leave as is with ()
-          else                  -> println("call: ${token!!.text}${ctx.text}")
+          "arrsize", "strpos" -> Unit // ignore! leave as is with ()
+          else                -> println("call: ${token!!.text}${ctx.text}")
         }
       }
     }
@@ -259,6 +259,11 @@ class KotlinToQspTranspiler(
   class LineStringExprTracker(val list: MutableList<String>) : KotlinParserBaseListener() {
     override fun enterLineStringExpression(ctx: KotlinParser.LineStringExpressionContext) {
       list[ctx.start.tokenIndex] = "<<"; list[ctx.stop.tokenIndex] = ">>"
+      for (i in ctx.start.tokenIndex..ctx.stop.tokenIndex) {
+        if (list[i] == "\"") {
+          list[i] = "'"
+        }
+      }
     }
   }
 
